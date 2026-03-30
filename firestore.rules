@@ -1,0 +1,54 @@
+// firestore.rules
+// Разместите эти правила в Firebase Console → Firestore → Rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helper functions ──────────────────────────────────────────
+    function isAuth() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isAuth() && request.auth.uid == userId;
+    }
+    function isAdmin() {
+      return isAuth() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ─── Animals ──────────────────────────────────────────────────
+    // Everyone can read; only admins can write
+    match /animals/{animalId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ─── Users ────────────────────────────────────────────────────
+    // Users can read/update their own profile; admins can read all
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ─── Bookings ─────────────────────────────────────────────────
+    // Users can CRUD their own bookings; admins can manage all
+    match /bookings/{bookingId} {
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow create: if isAuth() && request.auth.uid == request.resource.data.userId;
+      allow update: if isOwner(resource.data.userId) || isAdmin();
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+
+    // ─── Reviews ──────────────────────────────────────────────────
+    // Everyone can read; auth users can create; owners/admins can delete
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isAuth() && request.auth.uid == request.resource.data.userId;
+      allow update: if isOwner(resource.data.userId) || isAdmin();
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+  }
+}
