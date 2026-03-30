@@ -48,7 +48,12 @@
       <div v-if="tab === 'animals'" class="admin-panel">
         <div class="panel-toolbar">
           <h3>Питомцы</h3>
-          <button class="btn btn-primary btn-sm" @click="openAnimalForm(null)">+ Добавить питомца</button>
+          <div class="toolbar-actions">
+            <button class="btn btn-outline btn-sm" :disabled="seedLoading" @click="handleSeed">
+              {{ seedLoading ? 'Загрузка…' : 'Заполнить тестовыми данными' }}
+            </button>
+            <button class="btn btn-primary btn-sm" @click="openAnimalForm(null)">+ Добавить питомца</button>
+          </div>
         </div>
 
         <div v-if="loadingAnimals"><div class="spinner"></div></div>
@@ -280,6 +285,7 @@
 import { ref, onMounted } from 'vue'
 import { collection, getDocs, query, orderBy, doc, setDoc, updateDoc, getCountFromServer } from 'firebase/firestore'
 import { db } from '@/firebase/config.js'
+import { seedDatabase } from '@/firebase/seed.js'
 import { useAnimalsStore } from '@/store/animals.js'
 import { useBookingsStore } from '@/store/bookings.js'
 import { useReviewsStore } from '@/store/reviews.js'
@@ -465,6 +471,22 @@ async function deleteReviewAdmin(r) {
   success('Отзыв удалён')
 }
 
+const seedLoading = ref(false)
+
+async function handleSeed() {
+  seedLoading.value = true
+  try {
+    await seedDatabase()
+    await loadAnimals()
+    await loadStats()
+    success('База данных заполнена тестовыми данными!')
+  } catch (e) {
+    error('Ошибка при заполнении базы данных')
+  } finally {
+    seedLoading.value = false
+  }
+}
+
 onMounted(async () => {
   await loadStats()
   await loadAnimals()
@@ -530,6 +552,7 @@ onMounted(async () => {
   margin-bottom: 20px;
 }
 .panel-toolbar h3 { font-size: 20px; }
+.toolbar-actions { display: flex; gap: 8px; align-items: center; }
 
 .admin-table-wrap { overflow-x: auto; }
 .admin-table {

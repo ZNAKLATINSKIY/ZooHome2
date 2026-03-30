@@ -7,6 +7,7 @@ import {
   getCountFromServer
 } from 'firebase/firestore'
 import { db } from '@/firebase/config.js'
+import { seedDatabase } from '@/firebase/seed.js'
 
 const PAGE_SIZE = 9
 
@@ -48,6 +49,16 @@ export const useAnimalsStore = defineStore('animals', () => {
     try {
       const countSnap = await getCountFromServer(collection(db, 'animals'))
       total.value = countSnap.data().count
+
+      if (total.value === 0) {
+        try {
+          await seedDatabase()
+          const recount = await getCountFromServer(collection(db, 'animals'))
+          total.value = recount.data().count
+        } catch (e) {
+          console.error('Auto-seed failed:', e)
+        }
+      }
 
       const constraints = buildConstraints(filters)
       const q = query(collection(db, 'animals'), ...constraints, limit(PAGE_SIZE))
