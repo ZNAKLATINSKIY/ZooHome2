@@ -8,7 +8,6 @@
         </div>
       </div>
 
-      <!-- Stats bar -->
       <div class="stats-bar">
         <div class="stat-card">
           <span class="stat-icon">🐾</span>
@@ -40,14 +39,12 @@
         </div>
       </div>
 
-      <!-- Tabs -->
       <div class="admin-tabs">
         <button v-for="t in tabs" :key="t.key" :class="['admin-tab', { active: tab === t.key }]" @click="switchTab(t.key)">
           {{ t.icon }} {{ t.label }}
         </button>
       </div>
 
-      <!-- Animals management -->
       <div v-if="tab === 'animals'" class="admin-panel">
         <div class="panel-toolbar">
           <h3>Питомцы</h3>
@@ -96,7 +93,6 @@
         </div>
       </div>
 
-      <!-- Bookings management -->
       <div v-else-if="tab === 'bookings'" class="admin-panel">
         <div class="panel-toolbar"><h3>Все записи</h3></div>
         <div v-if="loadingBookings"><div class="spinner"></div></div>
@@ -127,7 +123,6 @@
         </div>
       </div>
 
-      <!-- Users management -->
       <div v-else-if="tab === 'users'" class="admin-panel">
         <div class="panel-toolbar"><h3>Пользователи</h3></div>
         <div v-if="loadingUsers"><div class="spinner"></div></div>
@@ -158,7 +153,6 @@
         </div>
       </div>
 
-      <!-- Reviews moderation -->
       <div v-else-if="tab === 'reviews'" class="admin-panel">
         <div class="panel-toolbar"><h3>Все отзывы</h3></div>
         <div v-if="loadingReviews"><div class="spinner"></div></div>
@@ -183,7 +177,6 @@
       </div>
     </div>
 
-    <!-- Animal form modal -->
     <Teleport to="body">
       <div v-if="showForm" class="modal-overlay" @click.self="showForm = false">
         <div class="modal">
@@ -263,7 +256,6 @@
       </div>
     </Teleport>
 
-    <!-- Delete confirm modal -->
     <Teleport to="body">
       <div v-if="deleteTarget" class="modal-overlay" @click.self="deleteTarget = null">
         <div class="modal" style="max-width: 400px;">
@@ -399,16 +391,22 @@ function openAnimalForm(animal) {
 async function saveAnimal() {
   formLoading.value = true
   try {
-    const data = {
-      ...animalForm.value,
-      tags: tagsInput.value.split(',').map(t => t.trim()).filter(Boolean)
-    }
     if (editingAnimal.value) {
+      const { id, rating, reviewsCount, createdAt, ...editableFields } = animalForm.value
+      const data = {
+        ...editableFields,
+        tags: tagsInput.value.split(',').map(t => t.trim()).filter(Boolean)
+      }
       await animalsStore.updateAnimal(editingAnimal.value.id, data)
+      const refreshed = await animalsStore.getAnimal(editingAnimal.value.id)
       const idx = adminAnimals.value.findIndex(a => a.id === editingAnimal.value.id)
-      if (idx !== -1) adminAnimals.value[idx] = { ...adminAnimals.value[idx], ...data }
+      if (idx !== -1 && refreshed) adminAnimals.value[idx] = refreshed
       success('Питомец обновлён!')
     } else {
+      const data = {
+        ...animalForm.value,
+        tags: tagsInput.value.split(',').map(t => t.trim()).filter(Boolean)
+      }
       const ref = await animalsStore.addAnimal(data)
       adminAnimals.value.unshift({ id: ref.id, ...data, rating: 0, reviewsCount: 0 })
       stats.value.animals++
@@ -566,7 +564,6 @@ onMounted(async () => {
 .table-actions { display: flex; gap: 6px; align-items: center; }
 .review-text-cell { max-width: 240px; color: var(--stone); }
 
-/* Form modal */
 .animal-form { display: flex; flex-direction: column; gap: 16px; }
 .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .form-check {

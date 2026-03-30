@@ -9,12 +9,10 @@
     </div>
 
     <template v-else>
-      <!-- Back -->
       <div class="container back-row">
         <RouterLink to="/" class="back-link">← Все питомцы</RouterLink>
       </div>
 
-      <!-- Animal hero -->
       <div class="container animal-hero">
         <div class="animal-gallery">
           <img
@@ -40,7 +38,6 @@
             <span class="reviews-link" @click="scrollToReviews">{{ animal.reviewsCount || 0 }} отзывов</span>
           </div>
 
-          <!-- Details grid -->
           <div class="details-grid">
             <div class="detail-item">
               <span class="detail-icon">🎂</span>
@@ -67,12 +64,10 @@
 
           <p class="animal-description">{{ animal.description }}</p>
 
-          <!-- Tags -->
           <div v-if="animal.tags?.length" class="tags-row">
             <span v-for="tag in animal.tags" :key="tag" class="tag">{{ tag }}</span>
           </div>
 
-          <!-- Booking form -->
           <div class="booking-box">
             <h3 class="booking-title">Записаться на знакомство</h3>
 
@@ -112,14 +107,12 @@
         </div>
       </div>
 
-      <!-- Reviews section -->
       <div class="container reviews-section" ref="reviewsRef">
         <div class="section-heading">
           <h2>Отзывы</h2>
           <div class="section-heading-line"></div>
         </div>
 
-        <!-- Add review -->
         <div v-if="auth.isLoggedIn && !userHasReview" class="add-review-box">
           <h4>Оставить отзыв</h4>
           <StarRating v-model="newRating" />
@@ -136,7 +129,6 @@
           >{{ reviewLoading ? 'Отправка…' : 'Отправить отзыв' }}</button>
         </div>
 
-        <!-- Reviews list -->
         <div v-if="reviewsStore.loading"><div class="spinner"></div></div>
         <div v-else-if="reviewsStore.reviews.length === 0" class="empty-state" style="padding: 40px;">
           <div class="empty-state-icon" style="font-size: 40px;">💬</div>
@@ -153,7 +145,6 @@
         </TransitionGroup>
       </div>
 
-      <!-- Related animals -->
       <div v-if="related.length" class="container related-section">
         <div class="section-heading">
           <h2>Похожие питомцы</h2>
@@ -358,7 +349,6 @@ watch(() => route.params.id, load)
 .tags-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
 .tag { padding: 5px 12px; background: var(--parchment); border-radius: 100px; font-size: 13px; color: var(--stone); }
 
-/* Booking box */
 .booking-box {
   background: white;
   border: 1.5px solid var(--parchment);
@@ -371,7 +361,6 @@ watch(() => route.params.id, load)
 .booking-form { display: flex; flex-direction: column; gap: 14px; }
 .booking-submit { width: 100%; justify-content: center; }
 
-/* Reviews */
 .reviews-section { margin-bottom: 60px; }
 .add-review-box {
   background: white;

@@ -1,4 +1,3 @@
-// src/store/animals.js
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import {
@@ -19,7 +18,6 @@ export const useAnimalsStore = defineStore('animals', () => {
   const total = ref(0)
   let unsubscribe = null
 
-  // Build query constraints
   function buildConstraints({ category, search, sortBy, gender, available }) {
     const constraints = []
     if (category && category !== 'all') {
@@ -48,6 +46,9 @@ export const useAnimalsStore = defineStore('animals', () => {
     hasMore.value = true
 
     try {
+      const countSnap = await getCountFromServer(collection(db, 'animals'))
+      total.value = countSnap.data().count
+
       const constraints = buildConstraints(filters)
       const q = query(collection(db, 'animals'), ...constraints, limit(PAGE_SIZE))
       const snap = await getDocs(q)
@@ -56,7 +57,6 @@ export const useAnimalsStore = defineStore('animals', () => {
       lastDoc.value = snap.docs[snap.docs.length - 1] || null
       hasMore.value = snap.docs.length === PAGE_SIZE
 
-      // Client-side search filter
       if (filters.search) {
         const s = filters.search.toLowerCase()
         animals.value = animals.value.filter(a =>
@@ -91,7 +91,6 @@ export const useAnimalsStore = defineStore('animals', () => {
     }
   }
 
-  // Real-time subscription for new animals
   function subscribeToAnimals(callback) {
     if (unsubscribe) unsubscribe()
     const q = query(collection(db, 'animals'), orderBy('createdAt', 'desc'), limit(1))

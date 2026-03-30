@@ -1,13 +1,11 @@
 <template>
   <header class="header" :class="{ scrolled: isScrolled }">
     <div class="container header-inner">
-      <!-- Logo -->
       <RouterLink to="/" class="logo">
         <span class="logo-icon">🐾</span>
         <span class="logo-text">ZooHome</span>
       </RouterLink>
 
-      <!-- Desktop nav -->
       <nav class="nav desktop-nav">
         <RouterLink to="/" class="nav-link">Питомцы</RouterLink>
         <RouterLink v-if="auth.isLoggedIn" to="/bookings" class="nav-link">
@@ -19,7 +17,6 @@
         </RouterLink>
       </nav>
 
-      <!-- Auth section -->
       <div class="header-auth">
         <template v-if="auth.isLoggedIn">
           <RouterLink to="/profile" class="avatar-btn" :title="auth.displayName">
@@ -31,14 +28,12 @@
           <RouterLink to="/login" class="btn btn-primary btn-sm">Войти</RouterLink>
         </template>
 
-        <!-- Burger -->
         <button class="burger" @click="mobileOpen = !mobileOpen" aria-label="Menu">
           <span :class="{ open: mobileOpen }"></span>
         </button>
       </div>
     </div>
 
-    <!-- Mobile menu -->
     <Transition name="mobile-menu">
       <div v-if="mobileOpen" class="mobile-menu">
         <RouterLink to="/" class="mobile-link" @click="mobileOpen = false">🐱 Питомцы</RouterLink>
@@ -184,7 +179,6 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 }
 .avatar:hover { transform: scale(1.05); }
 
-/* Burger */
 .burger {
   display: none;
   width: 36px; height: 36px;
@@ -218,7 +212,6 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 .burger span.open::before { transform: rotate(45deg); top: 0; }
 .burger span.open::after { transform: rotate(-45deg); top: 0; }
 
-/* Mobile menu */
 .mobile-menu {
   display: flex;
   flex-direction: column;

@@ -10,17 +10,14 @@
 
     <div class="auth-form-side">
       <div class="auth-form-wrap">
-        <!-- Tabs -->
         <div class="auth-tabs">
           <button :class="['tab', { active: mode === 'login' }]" @click="mode = 'login'">Войти</button>
           <button :class="['tab', { active: mode === 'register' }]" @click="mode = 'register'">Регистрация</button>
         </div>
 
-        <!-- Error -->
         <div v-if="errorMsg" class="alert alert-error">{{ errorMsg }}</div>
         <div v-if="successMsg" class="alert alert-success">{{ successMsg }}</div>
 
-        <!-- Login form -->
         <form v-if="mode === 'login'" @submit.prevent="handleLogin" class="form">
           <div class="form-group">
             <label class="form-label">Email</label>
@@ -36,7 +33,6 @@
           </button>
         </form>
 
-        <!-- Register form -->
         <form v-else @submit.prevent="handleRegister" class="form">
           <div class="form-group">
             <label class="form-label">Имя</label>

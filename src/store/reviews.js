@@ -1,4 +1,3 @@
-// src/store/reviews.js
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import {
@@ -32,7 +31,6 @@ export const useReviewsStore = defineStore('reviews', () => {
       createdAt: serverTimestamp()
     })
 
-    // Update animal rating
     await runTransaction(db, async (tx) => {
       const animalRef = doc(db, 'animals', animalId)
       const animalSnap = await tx.get(animalRef)

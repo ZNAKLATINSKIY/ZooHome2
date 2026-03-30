@@ -34,7 +34,6 @@
         </div>
       </div>
 
-      <!-- Actions -->
       <div v-if="!readOnly" class="booking-actions">
         <RouterLink :to="`/animal/${booking.animalId}`" class="btn btn-outline btn-sm">
           Посмотреть питомца

@@ -1,4 +1,3 @@
-// src/main.js
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
@@ -12,7 +11,6 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 
-// Wait for auth to initialize before mounting
 const authStore = useAuthStore()
 authStore.init().then(() => {
   app.mount('#app')

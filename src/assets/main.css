@@ -1,4 +1,3 @@
-/* src/assets/main.css */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
 
 :root {
@@ -64,12 +63,10 @@ input, textarea, select {
   outline: none;
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--parchment); }
 ::-webkit-scrollbar-thumb { background: var(--tan); border-radius: 3px; }
 
-/* Utility */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -138,7 +135,6 @@ input, textarea, select {
   transform: none !important;
 }
 
-/* Form controls */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -171,7 +167,6 @@ input, textarea, select {
 
 .form-textarea { resize: vertical; min-height: 100px; }
 
-/* Card */
 .card {
   background: white;
   border-radius: var(--radius-lg);
@@ -181,7 +176,6 @@ input, textarea, select {
 }
 .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
 
-/* Badge */
 .badge {
   display: inline-block;
   padding: 4px 10px;
@@ -194,7 +188,6 @@ input, textarea, select {
 .badge-danger { background: rgba(196, 98, 58, 0.12); color: var(--rust); }
 .badge-info { background: rgba(107, 143, 113, 0.12); color: var(--sage); }
 
-/* Page layout */
 .page {
   min-height: calc(100vh - 70px);
   padding: 40px 0 80px;
@@ -212,7 +205,6 @@ input, textarea, select {
   margin-bottom: 40px;
 }
 
-/* Alert */
 .alert {
   padding: 14px 18px;
   border-radius: var(--radius-md);
@@ -222,7 +214,6 @@ input, textarea, select {
 .alert-error { background: #fef2f2; color: #c0392b; border: 1px solid #fecaca; }
 .alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
 
-/* Loading spinner */
 .spinner {
   width: 40px; height: 40px;
   border: 3px solid var(--parchment);
@@ -233,12 +224,10 @@ input, textarea, select {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Stars */
 .stars { display: inline-flex; gap: 2px; }
 .star { color: #D4B896; font-size: 14px; }
 .star.filled { color: #C4623A; }
 
-/* Grid */
 .grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -259,14 +248,12 @@ input, textarea, select {
   .page { padding: 24px 0 60px; }
 }
 
-/* Animations */
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 
 .slide-up-enter-active { transition: all 0.4s ease; }
 .slide-up-enter-from { opacity: 0; transform: translateY(20px); }
 
-/* Modal overlay */
 .modal-overlay {
   position: fixed; inset: 0;
   background: rgba(26, 26, 24, 0.6);
@@ -321,7 +308,6 @@ input, textarea, select {
 }
 .modal-close:hover { background: var(--tan); }
 
-/* Toast notification */
 .toast-container {
   position: fixed;
   bottom: 24px;
@@ -351,7 +337,6 @@ input, textarea, select {
   to { opacity: 1; transform: none; }
 }
 
-/* Empty state */
 .empty-state {
   text-align: center;
   padding: 80px 20px;
@@ -370,7 +355,6 @@ input, textarea, select {
   margin-bottom: 24px;
 }
 
-/* Section heading */
 .section-heading {
   display: flex;
   align-items: baseline;
@@ -384,7 +368,6 @@ input, textarea, select {
   background: var(--parchment);
 }
 
-/* Status pill */
 .status-pending { color: #B8874A; background: rgba(184, 135, 74, 0.1); }
 .status-confirmed { color: #3D5A3E; background: rgba(61, 90, 62, 0.1); }
 .status-completed { color: #6B8F71; background: rgba(107, 143, 113, 0.1); }

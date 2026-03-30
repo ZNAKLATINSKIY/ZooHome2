@@ -4,7 +4,6 @@
       <h1 class="page-title">Личный кабинет</h1>
 
       <div class="profile-layout">
-        <!-- Sidebar -->
         <aside class="profile-sidebar">
           <div class="profile-avatar-block">
             <div class="big-avatar">{{ initials }}</div>
@@ -26,9 +25,7 @@
           </nav>
         </aside>
 
-        <!-- Content -->
         <main class="profile-content">
-          <!-- Profile info -->
           <div v-if="section === 'info'" class="section-card">
             <h3 class="section-card-title">Личные данные</h3>
 
@@ -55,7 +52,6 @@
             </form>
           </div>
 
-          <!-- Bookings history -->
           <div v-else-if="section === 'bookings'" class="section-card">
             <h3 class="section-card-title">История записей</h3>
             <div v-if="loadingData"><div class="spinner"></div></div>
@@ -74,7 +70,6 @@
             </div>
           </div>
 
-          <!-- Reviews -->
           <div v-else-if="section === 'reviews'" class="section-card">
             <h3 class="section-card-title">Мои отзывы</h3>
             <div v-if="loadingData"><div class="spinner"></div></div>
@@ -163,7 +158,6 @@ async function loadReviews() {
   loadingData.value = true
   try {
     const reviews = await reviewsStore.fetchUserReviews(auth.user.uid)
-    // Enrich with animal names
     const enriched = await Promise.all(reviews.map(async r => {
       try {
         const { getDoc, doc } = await import('firebase/firestore')

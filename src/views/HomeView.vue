@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- Hero -->
     <section class="hero">
       <div class="hero-bg"></div>
       <div class="container hero-content">
@@ -8,7 +7,6 @@
           <h1 class="hero-title">Найдите своего <em>идеального</em> питомца</h1>
           <p class="hero-sub">Более {{ totalAnimals }}+ животных ждут своего нового дома. Запишитесь на знакомство уже сегодня.</p>
         </div>
-        <!-- Search bar -->
         <div class="hero-search">
           <span class="search-icon">🔍</span>
           <input
@@ -23,7 +21,6 @@
       </div>
     </section>
 
-    <!-- Real-time notification -->
     <Transition name="fade">
       <div v-if="newAnimalNotice" class="realtime-notice container">
         🐾 Только что добавлен новый питомец — <strong>{{ newAnimalNotice }}</strong>!
@@ -32,7 +29,6 @@
     </Transition>
 
     <div class="container page-body">
-      <!-- Filters -->
       <aside class="filters-panel">
         <h3 class="filters-title">Фильтры</h3>
 
@@ -81,9 +77,7 @@
         <button class="btn btn-outline btn-sm reset-btn" @click="resetFilters">Сбросить</button>
       </aside>
 
-      <!-- Main content -->
       <main class="catalog-main">
-        <!-- Active filters chips -->
         <div v-if="hasActiveFilters" class="active-filters">
           <span v-if="search" class="filter-chip">
             🔍 "{{ search }}" <button @click="clearSearch">✕</button>
@@ -93,12 +87,10 @@
           </span>
         </div>
 
-        <!-- Loading -->
         <div v-if="store.loading && store.animals.length === 0">
           <div class="spinner"></div>
         </div>
 
-        <!-- Empty -->
         <div v-else-if="!store.loading && store.animals.length === 0" class="empty-state">
           <div class="empty-state-icon">🐾</div>
           <h3>Питомцы не найдены</h3>
@@ -106,12 +98,10 @@
           <button class="btn btn-primary" @click="resetFilters">Сбросить фильтры</button>
         </div>
 
-        <!-- Animals grid -->
         <TransitionGroup v-else name="slide-up" tag="div" class="grid-3">
           <AnimalCard v-for="animal in store.animals" :key="animal.id" :animal="animal" />
         </TransitionGroup>
 
-        <!-- Load more -->
         <div v-if="store.hasMore && store.animals.length > 0" class="load-more-wrap">
           <button
             class="btn btn-outline btn-lg"
@@ -136,7 +126,7 @@ const store = useAnimalsStore()
 
 const search = ref('')
 const newAnimalNotice = ref(null)
-const totalAnimals = ref(50)
+const totalAnimals = computed(() => store.total)
 
 const filters = ref({
   category: 'all',
@@ -191,7 +181,6 @@ function loadMore() {
   store.loadMore({ ...filters.value, search: search.value })
 }
 
-// Real-time subscription
 let unsub = null
 onMounted(() => {
   applyFilters()
@@ -208,7 +197,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Hero */
 .hero {
   position: relative;
   background: var(--charcoal);
@@ -258,7 +246,6 @@ onUnmounted(() => {
   font-size: 14px;
 }
 
-/* Real-time notice */
 .realtime-notice {
   background: var(--forest);
   color: white;
@@ -279,7 +266,6 @@ onUnmounted(() => {
   font-size: 16px;
 }
 
-/* Layout */
 .page-body {
   display: flex;
   gap: 32px;
@@ -288,7 +274,6 @@ onUnmounted(() => {
   align-items: flex-start;
 }
 
-/* Filters */
 .filters-panel {
   width: 220px;
   flex-shrink: 0;
@@ -329,10 +314,8 @@ onUnmounted(() => {
 .cat-pill.active { border-color: var(--forest); background: rgba(61, 90, 62, 0.08); color: var(--forest); font-weight: 500; }
 .reset-btn { width: 100%; justify-content: center; margin-top: 8px; }
 
-/* Catalog main */
 .catalog-main { flex: 1; min-width: 0; }
 
-/* Active filters */
 .active-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
 .filter-chip {
   display: inline-flex;
@@ -357,7 +340,6 @@ onUnmounted(() => {
 
 .load-more-wrap { text-align: center; margin-top: 40px; }
 
-/* Responsive */
 @media (max-width: 900px) {
   .page-body { flex-direction: column; }
   .filters-panel {
