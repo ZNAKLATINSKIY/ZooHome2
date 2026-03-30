@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import {
-  collection, query, where, orderBy, limit,
-  startAfter, getDocs, getDoc, doc, addDoc,
+  collection, query, orderBy, limit,
+  getDocs, getDoc, doc, addDoc,
   updateDoc, deleteDoc, serverTimestamp, onSnapshot,
   getCountFromServer
 } from 'firebase/firestore'
@@ -13,101 +13,103 @@ const PAGE_SIZE = 9
 const SEED_INDEX_DELAY_MS = 1500
 
 export const useAnimalsStore = defineStore('animals', () => {
+  const allAnimals = ref([])
   const animals = ref([])
   const loading = ref(false)
-  const lastDoc = ref(null)
-  const hasMore = ref(true)
+  const hasMore = ref(false)
   const total = ref(0)
   let unsubscribe = null
+  let activeFilteredList = []
+  let activeFilters = {}
 
-  function buildConstraints({ category, search, sortBy, gender, available }) {
-    const constraints = []
+  function applyClientFilters(list, { category, search, sortBy, gender, available } = {}) {
+    let result = [...list]
     if (category && category !== 'all') {
-      constraints.push(where('category', '==', category))
+      result = result.filter(a => a.category === category)
     }
     if (gender && gender !== 'all') {
-      constraints.push(where('gender', '==', gender))
+      result = result.filter(a => a.gender === gender)
     }
     if (available !== null && available !== undefined && available !== 'all') {
-      constraints.push(where('available', '==', available === 'true' || available === true))
+      const avail = available === 'true' || available === true
+      result = result.filter(a => a.available === avail)
+    }
+    if (search) {
+      const s = search.toLowerCase()
+      result = result.filter(a =>
+        a.name?.toLowerCase().includes(s) ||
+        a.breed?.toLowerCase().includes(s) ||
+        a.species?.toLowerCase().includes(s) ||
+        a.description?.toLowerCase().includes(s)
+      )
     }
     switch (sortBy) {
-      case 'price_asc': constraints.push(orderBy('price', 'asc')); break
-      case 'price_desc': constraints.push(orderBy('price', 'desc')); break
-      case 'rating': constraints.push(orderBy('rating', 'desc')); break
-      case 'age': constraints.push(orderBy('age', 'asc')); break
-      default: constraints.push(orderBy('createdAt', 'desc'))
+      case 'price_asc': result.sort((a, b) => (a.price || 0) - (b.price || 0)); break
+      case 'price_desc': result.sort((a, b) => (b.price || 0) - (a.price || 0)); break
+      case 'rating': result.sort((a, b) => (b.rating || 0) - (a.rating || 0)); break
+      case 'age': result.sort((a, b) => (a.age || 0) - (b.age || 0)); break
+      default: result.sort((a, b) => {
+        const ta = a.createdAt?.seconds || 0
+        const tb = b.createdAt?.seconds || 0
+        return tb - ta
+      })
     }
-    return constraints
+    return result
   }
 
   async function fetchAnimals(filters = {}) {
     loading.value = true
     animals.value = []
-    lastDoc.value = null
-    hasMore.value = true
+    hasMore.value = false
+    activeFilters = { ...filters }
 
     try {
       const countSnap = await getCountFromServer(collection(db, 'animals'))
       total.value = countSnap.data().count
 
-      let justSeeded = false
       if (total.value === 0) {
         try {
           await seedDatabase()
-          // Wait for Firestore to finish indexing the new serverTimestamp() documents
           await new Promise(resolve => setTimeout(resolve, SEED_INDEX_DELAY_MS))
           const recount = await getCountFromServer(collection(db, 'animals'))
           total.value = recount.data().count
-          justSeeded = true
         } catch (e) {
           console.error('Auto-seed failed:', e)
         }
       }
 
-      const constraints = buildConstraints(filters)
-      const q = query(collection(db, 'animals'), ...constraints, limit(PAGE_SIZE))
+      const q = query(collection(db, 'animals'), orderBy('createdAt', 'desc'))
       const snap = await getDocs(q)
+      allAnimals.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
 
-      if (justSeeded && snap.docs.length === 0 && animals.value.length > 0) {
-        lastDoc.value = null
-        hasMore.value = false
-        return
-      }
-
-      animals.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-      lastDoc.value = snap.docs[snap.docs.length - 1] || null
-      hasMore.value = snap.docs.length === PAGE_SIZE
-
-      if (filters.search) {
-        const s = filters.search.toLowerCase()
-        animals.value = animals.value.filter(a =>
-          a.name?.toLowerCase().includes(s) ||
-          a.breed?.toLowerCase().includes(s) ||
-          a.species?.toLowerCase().includes(s) ||
-          a.description?.toLowerCase().includes(s)
-        )
-      }
+      activeFilteredList = applyClientFilters(allAnimals.value, filters)
+      animals.value = activeFilteredList.slice(0, PAGE_SIZE)
+      hasMore.value = activeFilteredList.length > PAGE_SIZE
+    } catch (e) {
+      console.error('fetchAnimals error:', e)
     } finally {
       loading.value = false
     }
   }
 
   async function loadMore(filters = {}) {
-    if (!hasMore.value || !lastDoc.value) return
+    if (!hasMore.value) return
     loading.value = true
 
     try {
-      const constraints = buildConstraints(filters)
-      const q = query(
-        collection(db, 'animals'), ...constraints,
-        startAfter(lastDoc.value), limit(PAGE_SIZE)
-      )
-      const snap = await getDocs(q)
-      const newItems = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-      animals.value.push(...newItems)
-      lastDoc.value = snap.docs[snap.docs.length - 1] || null
-      hasMore.value = snap.docs.length === PAGE_SIZE
+      const currentCount = animals.value.length
+      const keys = Object.keys(filters)
+      const filtersChanged = keys.length !== Object.keys(activeFilters).length ||
+        keys.some(k => filters[k] !== activeFilters[k])
+      if (filtersChanged) {
+        activeFilters = { ...filters }
+        activeFilteredList = applyClientFilters(allAnimals.value, filters)
+      }
+      const nextBatch = activeFilteredList.slice(currentCount, currentCount + PAGE_SIZE)
+      animals.value.push(...nextBatch)
+      hasMore.value = animals.value.length < activeFilteredList.length
+    } catch (e) {
+      console.error('loadMore error:', e)
     } finally {
       loading.value = false
     }
@@ -120,20 +122,32 @@ export const useAnimalsStore = defineStore('animals', () => {
       snap.docChanges().forEach(change => {
         if (change.type === 'added') {
           const newAnimal = { id: change.doc.id, ...change.doc.data() }
-          const exists = animals.value.find(a => a.id === newAnimal.id)
+          const exists = allAnimals.value.find(a => a.id === newAnimal.id)
           if (!exists) {
-            animals.value.unshift(newAnimal)
+            allAnimals.value.unshift(newAnimal)
+            activeFilteredList = applyClientFilters(allAnimals.value, activeFilters)
+            const displayed = animals.value.length
+            animals.value = activeFilteredList.slice(0, Math.max(displayed, PAGE_SIZE))
+            hasMore.value = animals.value.length < activeFilteredList.length
             if (callback) callback(newAnimal)
           }
         }
         if (change.type === 'modified') {
-          const idx = animals.value.findIndex(a => a.id === change.doc.id)
+          const idx = allAnimals.value.findIndex(a => a.id === change.doc.id)
           if (idx !== -1) {
-            animals.value[idx] = { id: change.doc.id, ...change.doc.data() }
+            allAnimals.value[idx] = { id: change.doc.id, ...change.doc.data() }
+            activeFilteredList = applyClientFilters(allAnimals.value, activeFilters)
+            const displayed = animals.value.length
+            animals.value = activeFilteredList.slice(0, displayed)
+            hasMore.value = displayed < activeFilteredList.length
           }
         }
         if (change.type === 'removed') {
-          animals.value = animals.value.filter(a => a.id !== change.doc.id)
+          allAnimals.value = allAnimals.value.filter(a => a.id !== change.doc.id)
+          activeFilteredList = applyClientFilters(allAnimals.value, activeFilters)
+          const displayed = Math.min(animals.value.length, activeFilteredList.length)
+          animals.value = activeFilteredList.slice(0, displayed)
+          hasMore.value = displayed < activeFilteredList.length
         }
       })
     })
