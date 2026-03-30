@@ -10,6 +10,7 @@ import { db } from '@/firebase/config.js'
 import { seedDatabase } from '@/firebase/seed.js'
 
 const PAGE_SIZE = 9
+const SEED_INDEX_DELAY_MS = 1500
 
 export const useAnimalsStore = defineStore('animals', () => {
   const animals = ref([])
@@ -50,11 +51,15 @@ export const useAnimalsStore = defineStore('animals', () => {
       const countSnap = await getCountFromServer(collection(db, 'animals'))
       total.value = countSnap.data().count
 
+      let justSeeded = false
       if (total.value === 0) {
         try {
           await seedDatabase()
+          // Wait for Firestore to finish indexing the new serverTimestamp() documents
+          await new Promise(resolve => setTimeout(resolve, SEED_INDEX_DELAY_MS))
           const recount = await getCountFromServer(collection(db, 'animals'))
           total.value = recount.data().count
+          justSeeded = true
         } catch (e) {
           console.error('Auto-seed failed:', e)
         }
@@ -63,6 +68,12 @@ export const useAnimalsStore = defineStore('animals', () => {
       const constraints = buildConstraints(filters)
       const q = query(collection(db, 'animals'), ...constraints, limit(PAGE_SIZE))
       const snap = await getDocs(q)
+
+      if (justSeeded && snap.docs.length === 0 && animals.value.length > 0) {
+        lastDoc.value = null
+        hasMore.value = false
+        return
+      }
 
       animals.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
       lastDoc.value = snap.docs[snap.docs.length - 1] || null
