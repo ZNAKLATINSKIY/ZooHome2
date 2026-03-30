@@ -15,7 +15,6 @@
         </div>
       </div>
 
-      <!-- Active bookings (real-time) -->
       <div v-if="tab === 'active'">
         <div v-if="bookingsStore.activeBookings.length === 0" class="empty-state">
           <div class="empty-state-icon">📅</div>
@@ -37,7 +36,6 @@
         </div>
       </div>
 
-      <!-- History tab -->
       <div v-else-if="tab === 'history'">
         <div v-if="bookingsStore.loading"><div class="spinner"></div></div>
         <div v-else-if="bookingsStore.history.length === 0" class="empty-state">

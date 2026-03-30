@@ -1,6 +1,3 @@
-// src/firebase/seed.js
-// Run this once to populate Firestore with demo data
-// Import and call seedDatabase() from browser console or a temp component
 
 import { db } from './config.js'
 import { collection, addDoc, setDoc, doc, serverTimestamp } from 'firebase/firestore'

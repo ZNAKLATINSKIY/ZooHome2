@@ -1,4 +1,3 @@
-// src/composables/useToast.js
 import { ref } from 'vue'
 
 const toasts = ref([])

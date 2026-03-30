@@ -1,4 +1,3 @@
-// src/store/bookings.js
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import {
@@ -8,12 +7,11 @@ import {
 import { db } from '@/firebase/config.js'
 
 export const useBookingsStore = defineStore('bookings', () => {
-  const activeBookings = ref([])   // корзина / активные
-  const history = ref([])          // история
+  const activeBookings = ref([])
+  const history = ref([])
   const loading = ref(false)
   let unsubActive = null
 
-  // Real-time подписка на активные бронирования пользователя
   function subscribeActiveBookings(userId) {
     if (unsubActive) unsubActive()
     const q = query(
@@ -90,7 +88,6 @@ export const useBookingsStore = defineStore('bookings', () => {
     })
   }
 
-  // Admin: fetch all bookings
   async function fetchAllBookings() {
     const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'))
     const snap = await getDocs(q)
